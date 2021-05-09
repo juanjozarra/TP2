@@ -18,15 +18,14 @@ int main(void)
 	char tecla =0;
 	LCDinit();
 	LCDclr();
-	LCDhome();
+	LCDhome();	
 	
     while (1) 
     {
-		TECLADO_Actualizar(&tecla);
-		if(1){
+		if(TECLADO_Actualizar(&tecla)){
 			LCDsendChar(tecla);
 		}
-		_delay_ms(100);	
+		_delay_ms(10);	
 		
     }
 }

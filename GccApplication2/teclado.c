@@ -25,7 +25,7 @@ char KeypadScan (char *Key){ //escaneo del teclado
 	DDR=0b00001111; //setea las columnas como entradas y las filas como salidas
 	PORT=0b11110000; //habilita pull-up en las columnas
 	
-	for (int filaActual=0; filaActual<=3; filaActual++){
+	for (unsigned char filaActual=0; filaActual<=3; filaActual++){
 	switch(filaActual){
 		case 0:
 			PORT=0b11111110; //coloca un nivel bajo solo en la primera fila y recorre las columnas
@@ -34,7 +34,6 @@ char KeypadScan (char *Key){ //escaneo del teclado
 			if(aux&0b00100000){*Key='2';teclaPresionada=1;}
 			if(aux&0b01000000){*Key='3';teclaPresionada=1;}
 			if(aux&0b10000000){*Key='A';teclaPresionada=1;}
-			filaActual=1;
 		break;
 		case 1:
 			PORT=0b11111101;
@@ -43,7 +42,6 @@ char KeypadScan (char *Key){ //escaneo del teclado
 			if(aux&0b00100000){*Key='5';teclaPresionada=1;}
 			if(aux&0b01000000){*Key='6';teclaPresionada=1;}
 			if(aux&0b10000000){*Key='B';teclaPresionada=1;}
-			filaActual=2;
 		break;
 		case 2:
 			PORT=0b11111011;
@@ -52,7 +50,6 @@ char KeypadScan (char *Key){ //escaneo del teclado
 			if(aux&0b00100000){*Key='8';teclaPresionada=1;}
 			if(aux&0b01000000){*Key='9';teclaPresionada=1;}
 			if(aux&0b10000000){*Key='C';teclaPresionada=1;}
-			filaActual=3;
 		break;
 		case 3:
 			PORT=0b11110111;
@@ -61,7 +58,6 @@ char KeypadScan (char *Key){ //escaneo del teclado
 			if(aux&0b00100000){*Key='0';teclaPresionada=1;}
 			if(aux&0b01000000){*Key='#';teclaPresionada=1;}
 			if(aux&0b10000000){*Key='D';teclaPresionada=1;}
-			filaActual=0;
 		break;
 	}
 		}
