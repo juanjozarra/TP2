@@ -17,79 +17,75 @@
 * COLUMNA3 -> PORTB6
 * COLUMNA4 -> PORTB7
 ****************************************/
-#include "derivative.h"
 #include "teclado.h"
-static unsigned char recorrer_fila;
-static char teclaPresionada;
-static unsigned char flagNuevaTecla; //avisa que se leyo una tecla, ambas variables evitan leer varias veces la misma tecla si se mantiene presionada
-static unsigned char esperandoTecla; //avisa que ademas, la tecla leida fue nueva respecto a la lectura anterior, es decir, se produjo flanco ascendente
-unsigned char KeypadScan (char *Key){ //escaneo del teclado
-	unsigned char sePresiono_tecla = 0;
+
+char KeypadScan (char *Key){ //escaneo del teclado
+	unsigned char teclaPresionada=0;
 	unsigned char aux;
-	PTBDD=0x0F; //setea las columnas como entradas y las filas como salidas
-	PTBPE=0xF0; //habilita pull-up en las columnas
-	switch(recorrer_fila){
+	DDR=0b00001111; //setea las columnas como entradas y las filas como salidas
+	PORT=0b11110000; //habilita pull-up en las columnas
+	
+	for (int filaActual=0; filaActual<=3; filaActual++){
+	switch(filaActual){
 		case 0:
-		PTBD=0xFE; //coloca un nivel bajo en la primera fila y recorre las columnas
-		aux=~PTBD; //cuando se presiona una tecla, llega un 0 a la entrada de la columna correspondiente
-		if(aux&0x10){*Key='1';sePresiono_tecla=1;}
-		if(aux&0x20){*Key='2';sePresiono_tecla=1;}
-		if(aux&0x40){*Key='3';sePresiono_tecla=1;}
-		if(aux&0x80){*Key='A';sePresiono_tecla=1;}
-		recorrer_fila=1;
+			PORT=0b11111110; //coloca un nivel bajo solo en la primera fila y recorre las columnas
+			aux=~PIN; //cuando se presiona una tecla, llega un 0 a la entrada de la columna correspondiente, invierto los bits para que me quede un 1 en la entrada de la columna correspondiente
+			if(aux&0b00010000){*Key='1';teclaPresionada=1;}
+			if(aux&0b00100000){*Key='2';teclaPresionada=1;}
+			if(aux&0b01000000){*Key='3';teclaPresionada=1;}
+			if(aux&0b10000000){*Key='A';teclaPresionada=1;}
+			filaActual=1;
 		break;
 		case 1:
-		PTBD=0xFD;
-		aux=~PTBD;
-		if(aux&0x10){*Key='4';sePresiono_tecla=1;}
-		if(aux&0x20){*Key='5';sePresiono_tecla=1;}
-		if(aux&0x40){*Key='6';sePresiono_tecla=1;}
-		if(aux&0x80){*Key='B';sePresiono_tecla=1;}
-		recorrer_fila=2;
-		33
+			PORT=0b11111101;
+			aux=~PIN;
+			if(aux&0b00010000){*Key='4';teclaPresionada=1;}
+			if(aux&0b00100000){*Key='5';teclaPresionada=1;}
+			if(aux&0b01000000){*Key='6';teclaPresionada=1;}
+			if(aux&0b10000000){*Key='B';teclaPresionada=1;}
+			filaActual=2;
 		break;
 		case 2:
-		PTBD=0xFB;
-		aux=~PTBD;
-		if(aux&0x10){*Key='7';sePresiono_tecla=1;}
-		if(aux&0x20){*Key='8';sePresiono_tecla=1;}
-		if(aux&0x40){*Key='9';sePresiono_tecla=1;}
-		if(aux&0x80){*Key='C';sePresiono_tecla=1;}
-		recorrer_fila=3;
+			PORT=0b11111011;
+			aux=~PIN;
+			if(aux&0b00010000){*Key='7';teclaPresionada=1;}
+			if(aux&0b00100000){*Key='8';teclaPresionada=1;}
+			if(aux&0b01000000){*Key='9';teclaPresionada=1;}
+			if(aux&0b10000000){*Key='C';teclaPresionada=1;}
+			filaActual=3;
 		break;
 		case 3:
-		PTBD=0xF7;
-		aux=~PTBD;
-		if(aux&0x10){*Key='*';sePresiono_tecla=1;}
-		if(aux&0x20){*Key='0';sePresiono_tecla=1;}
-		if(aux&0x40){*Key='#';sePresiono_tecla=1;}
-		if(aux&0x80){*Key='D';sePresiono_tecla=1;}
-		recorrer_fila=0;
+			PORT=0b11110111;
+			aux=~PIN;
+			if(aux&0b00010000){*Key='*';teclaPresionada=1;}
+			if(aux&0b00100000){*Key='0';teclaPresionada=1;}
+			if(aux&0b01000000){*Key='#';teclaPresionada=1;}
+			if(aux&0b10000000){*Key='D';teclaPresionada=1;}
+			filaActual=0;
 		break;
 	}
-	return sePresiono_tecla;
+		}
+	
+	return teclaPresionada;
 }
-void TECLADO_Iniciar(void){
-	recorrer_fila=0;
-	flagNuevaTecla=0;
-	esperandoTecla=1;
-}
-void TECLADO_Actualizar(void){
-	char tecla=' ';
-	if(KeypadScan(&tecla)==1){ //revisa si hubo una nueva tecla presionada y actualiza flag
-		teclaPresionada=tecla;
-		flagNuevaTecla=1;
-		}else{
-		esperandoTecla=1; //cuando se deja de presionar se reinicia el flag y pasa a esperar tecla nueva
-	}
-}
-unsigned char TECLADO_getKey(char *auxKey){
-	if((flagNuevaTecla==1)&&(esperandoTecla==1)){ //la unica manera de acceder es con el flanco ascendente al presionar nueva tecla (evitando leer teclas repetidas por mantener presionado)
-		*auxKey=teclaPresionada;
-		flagNuevaTecla=0; //de esta manera se asegura de no repetir lecturas
-		esperandoTecla=0;
-		return 1;
-		}else{
+
+char TECLADO_Actualizar(char *pkey){
+	static char teclaAnterior;
+	char tecla, ultimaTeclaValida=0xFF; //No hay tecla presionada
+	
+	if(!KeypadScan(&tecla)){ //Si no se presiono una tecla
+		teclaAnterior=0xFF;
+		ultimaTeclaValida=0xFF;
 		return 0;
 	}
+	
+	if(tecla==teclaAnterior){
+		if(tecla!=ultimaTeclaValida){
+			*pkey=tecla;
+			ultimaTeclaValida=tecla;
+			return 1;
+		}
+	}
+	teclaAnterior=tecla;
+	return 0;
 }

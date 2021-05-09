@@ -10,18 +10,24 @@
 #define F_CPU 8000000UL
 #include <util/delay.h>
 #include "lcd.h"
+#include "teclado.h"
 
 
 int main(void)
 {
+	char tecla =0;
 	LCDinit();
 	LCDclr();
 	LCDhome();
 	
     while (1) 
     {
-		_delay_ms(100);
-		LCDsendChar('1');	
+		TECLADO_Actualizar(&tecla);
+		if(1){
+			LCDsendChar(tecla);
+		}
+		_delay_ms(100);	
+		
     }
 }
 

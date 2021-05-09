@@ -5,15 +5,13 @@
  *  Author: Juanjo
  */ 
 
+#ifndef TECLADO_H
+#define TECLADO_H
 
-#ifndef	TECLADO_H_
-#define TECLADO_H_
+	#define PORT PORTB
+	#define DDR DDRB
+	#define PIN PINB
 
-void TECLADO_Iniciar(void);
-void TECLADO_Actualizar(void);
-unsigned char KeypadScan (char *Key);
-unsigned char TECLADO_getKey(char *auxKey);
+	char TECLADO_Actualizar(char *pkey);
 
-
-
-#endif 
+#endif
