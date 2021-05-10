@@ -31,7 +31,7 @@ static unsigned char counter_tiempo=0;
 void SEOSTimer0Init(){
 	OCR0A = 77; //Valor con el cual comparar
 	TCCR0A = (1<<WGM01);// = 0b00000010; Modo CTC
-	TCCR0B = (1<<CS02)|(1<<CS01); // = 0b00000101; clk/1024 (From Prescaler) 8MHz/1024 =  7812.5 Hz
+	TCCR0B = (1<<CS02)|(1<<CS00); // = 0b00000101; clk/1024 (From Prescaler) 8MHz/1024 =  7812.5 Hz
 	TIMSK0 = (1<<OCIE0A); // Habilita el comparador. T=78/7812.5 Hz ~= 9,98 ms ~= 10ms
 	sei(); //Habilito interrupciones
 }
