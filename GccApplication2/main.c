@@ -18,9 +18,7 @@
 int main(void)
 {
 	//INICIALIZAR COSAS
-	LCDinit();
-	LCDclr();
-	LCDhome();
+	LCD_Init();
 	SEOSTimer0Init();	
 	
     while (1) 

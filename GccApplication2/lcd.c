@@ -372,6 +372,11 @@ void LCDprogressBar(uint8_t progress, uint8_t maxprogress, uint8_t length)
 		
 		// write character to display
 		LCDsendChar(c);
-	}
+	}	
+}
 
+void LCD_Init() {
+	LCDinit();
+	LCDclr();
+	LCDhome();
 }

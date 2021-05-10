@@ -83,6 +83,7 @@ void LCDcursorRight(uint8_t);	//shif cursor right by n
 // <length> is the number of LCD characters that the bargraph should cover
 //adapted from AVRLIB - displays progress only for 8 bit variables
 void LCDprogressBar(uint8_t progress, uint8_t maxprogress, uint8_t length);
+void LCD_Init();
 
 
 #endif
