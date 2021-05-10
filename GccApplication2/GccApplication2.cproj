@@ -144,6 +144,18 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="MEF.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="MEF.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="reloj.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="reloj.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="SEOS.c">
       <SubType>compile</SubType>
     </Compile>
