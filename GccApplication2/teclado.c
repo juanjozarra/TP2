@@ -66,8 +66,9 @@ char KeypadScan (char *Key){ //escaneo del teclado
 }
 
 char TECLADO_Actualizar(char *pkey){
-	static char teclaAnterior;
-	char tecla, ultimaTeclaValida=0xFF; //No hay tecla presionada
+	static char teclaAnterior = 0xFF;  //Inicializo como que no hubo tecla seleccionada
+	static char ultimaTeclaValida=0xFF; //Inicializo como que no hubo tecla seleccionada
+	char tecla;
 	
 	if(!KeypadScan(&tecla)){ //Si no se presiono una tecla
 		teclaAnterior=0xFF;
