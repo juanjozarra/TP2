@@ -18,6 +18,8 @@
 * COLUMNA4 -> PORTB7
 ****************************************/
 #include "teclado.h"
+#include <avr/io.h>
+
 
 char KeypadScan (char *Key){ //escaneo del teclado
 	unsigned char teclaPresionada=0;

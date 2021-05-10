@@ -7,7 +7,7 @@
 
 #ifndef TECLADO_H
 #define TECLADO_H
-	#include <avr/io.h>
+	
 	#define PORT PORTB
 	#define DDR DDRB
 	#define PIN PINB

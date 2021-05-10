@@ -11,22 +11,25 @@
 #include <util/delay.h>
 #include "lcd.h"
 #include "teclado.h"
+#include "SEOS.h"
+
 
 
 int main(void)
 {
-	char tecla =0;
+	//INICIALIZAR COSAS
 	LCDinit();
 	LCDclr();
-	LCDhome();	
+	LCDhome();
+	SEOSTimer0Init();	
 	
     while (1) 
     {
-		if(TECLADO_Actualizar(&tecla)){
-			LCDsendChar(tecla);
-		}
-		_delay_ms(10);	
+		
+		//DISPACHER SUPER SIMPLE
+		SEOSDispatcherTasks();
+		SEOSGoToSleep();
+		
 		
     }
 }
-
