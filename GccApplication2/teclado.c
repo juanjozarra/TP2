@@ -20,8 +20,14 @@
 #include "teclado.h"
 #include <avr/io.h>
 
+static unsigned char nueva_tecla = 0;
+static unsigned char tecla;
 
-char KeypadScan (char *Key){ //escaneo del teclado
+	unsigned char TECLADO_Actualizar(unsigned char *pkey);
+	unsigned char KeypadScan (unsigned char *Key);
+	
+
+unsigned char KeypadScan (unsigned char *Key){ //escaneo del teclado
 	unsigned char teclaPresionada=0;
 	unsigned char aux;
 	DDR=0b00001111; //setea las columnas como entradas y las filas como salidas
@@ -67,10 +73,10 @@ char KeypadScan (char *Key){ //escaneo del teclado
 	return teclaPresionada;
 }
 
-char TECLADO_Actualizar(char *pkey){
-	static char teclaAnterior = 0xFF;  //Inicializo como que no hubo tecla seleccionada
-	static char ultimaTeclaValida=0xFF; //Inicializo como que no hubo tecla seleccionada
-	char tecla;
+unsigned char TECLADO_Actualizar(unsigned char *pkey){
+	static unsigned char teclaAnterior = 0xFF;  //Inicializo como que no hubo tecla seleccionada
+	static unsigned char ultimaTeclaValida=0xFF; //Inicializo como que no hubo tecla seleccionada
+	unsigned char tecla;
 	
 	if(!KeypadScan(&tecla)){ //Si no se presiono una tecla
 		teclaAnterior=0xFF;
@@ -87,4 +93,13 @@ char TECLADO_Actualizar(char *pkey){
 	}
 	teclaAnterior=tecla;
 	return 0;
+}
+
+void TECLADO_refrescar (){
+	nueva_tecla = TECLADO_Actualizar(&tecla);
+}
+
+unsigned char TECLADO_tecla(unsigned char *pkey){
+	*pkey = tecla;
+	return nueva_tecla;
 }

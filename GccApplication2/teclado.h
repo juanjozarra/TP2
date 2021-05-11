@@ -11,7 +11,9 @@
 	#define PORT PORTB
 	#define DDR DDRB
 	#define PIN PINB
+	
+	void TECLADO_refrescar ();
+	unsigned char TECLADO_tecla(unsigned char *pkey);
 
-	char TECLADO_Actualizar(char *pkey);
 
 #endif

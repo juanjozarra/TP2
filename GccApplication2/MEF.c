@@ -20,42 +20,74 @@ typedef enum {
 	OPEN,
 	OLD_PASS,
 	NEW_PASS,
+	SUCCESS_UPDATE
 }ENUMS;
 
 static void STATE_default();
 static void STATE_setHora();
 static void STATE_setMIN();
 static void STATE_setSEG();
+static void STATE_deny();
+static void STATE_open();
+static void STATE_successUpdate();
+static void STATE_oldPass();
+static void STATE_newPass();
+static void STATE_readPass();
+
 
 ENUMS STATE = DEFAULT;
 
 extern unsigned char tiempo_String[];
-volatile unsigned char tecla, nueva_tecla = 0;
+extern unsigned char tiempo[6];
+
+static unsigned char tecla, nueva_tecla = 0;
 static unsigned char key[4] = {'0','8','5','2'};
 static unsigned char aux_key[4];
-extern unsigned char tiempo[6];
+
 
 
 void MEF_actualizar(){
+	nueva_tecla=TECLADO_tecla(&tecla);
 	switch (STATE)
 	{
 		case DEFAULT:
 			STATE_default();
-		break;
-		case SET_HORA: 
-			STATE_setHora();	
-		break;
+			break;
+		case SET_HORA:
+			STATE_setHora();
+			break;
 		case SET_MIN:
 			STATE_setMIN();
-		break;			
-	}	
+			break;
+		case SET_SEG:
+			STATE_setSEG();
+			break;
+		case DENY:
+			STATE_deny();
+			break;
+		case OPEN:
+			STATE_open();
+			break;
+		case READ_PASS:
+			STATE_readPass();
+			break;
+		case OLD_PASS:
+			STATE_oldPass();
+			break;
+		case NEW_PASS:
+			STATE_newPass();
+			break;
+		case SUCCESS_UPDATE:
+			STATE_successUpdate();
+		break;
+	}
 }
 
 
 void STATE_default(){
 	LCDclr();
 	LCDstring(tiempo_String,8);
-	unsigned char cerrado[]="CERRADO";
+	static unsigned char cerrado[]="CERRADO";
 	LCDGotoXY(9,1);
 	LCDstring(cerrado,7);
 	if(nueva_tecla){
@@ -97,12 +129,12 @@ void STATE_setHora(){
 	if (!aux_hora[0]){
 		LCDGotoXY(0,0);
 		LCDcursorOnBlink();
-	} else {
+		} else {
 		if(!aux_hora[1]){
 			LCDGotoXY(0,0);
 			LCDsendChar(aux_hora[0]);
 			LCDcursorOnBlink();
-		} else {
+			} else {
 			LCDGotoXY(0,0);
 			LCDstring(aux_hora, 2);
 		}
@@ -119,33 +151,33 @@ void STATE_setHora(){
 			case '7':
 			case '8':
 			case '9':
-				if (!aux_hora[0]){
-					aux_hora[0] = tecla;
+			if (!aux_hora[0]){
+				aux_hora[0] = tecla;
 				} else {
-					if (!aux_hora[1])
-						aux_hora[1] = tecla;
-					}
+				if (!aux_hora[1])
+				aux_hora[1] = tecla;
+			}
 			break;
 			case 'A':
-				if (aux_hora[0] && aux_hora[1]) {
-					if (aux_hora[0] < '2' || (aux_hora[0] == '2' && aux_hora[1] < '4')){
-						tiempo[0] = aux_hora[0] - '0';
-						tiempo[1] = aux_hora[1] - '0';
-						tiempo_String[0] = aux_hora[0];
-						tiempo_String[1] = aux_hora[1];
-					}
-					aux_hora[0] = 0;
-					aux_hora[1] = 0;
-					LCDcursorOFF();
-					STATE = DEFAULT; 
-										
+			if (aux_hora[0] && aux_hora[1]) {
+				if (aux_hora[0] < '2' || (aux_hora[0] == '2' && aux_hora[1] < '4')){
+					tiempo[0] = aux_hora[0] - '0';
+					tiempo[1] = aux_hora[1] - '0';
+					tiempo_String[0] = aux_hora[0];
+					tiempo_String[1] = aux_hora[1];
 				}
-			break;
-			case '#':
 				aux_hora[0] = 0;
 				aux_hora[1] = 0;
 				LCDcursorOFF();
 				STATE = DEFAULT;
+				
+			}
+			break;
+			case '#':
+			aux_hora[0] = 0;
+			aux_hora[1] = 0;
+			LCDcursorOFF();
+			STATE = DEFAULT;
 			break;
 		}
 	}
@@ -275,4 +307,211 @@ void STATE_setSEG(){
 		}
 	}
 }
+
+void STATE_deny(){
+	LCDclr();
+	static unsigned char msj []= "DENEGADO";
+	static unsigned char counter = 0;
+	LCDstring(msj,8);
+	if(++counter == 4){
+		STATE = DEFAULT;
+		counter = 0;
+	}
+}
+
+void STATE_open(){	
+		LCDclr();
+		LCDstring(tiempo_String,8);
+		unsigned char abierto[]="ABIERTO";
+		LCDGotoXY(9,1);
+		LCDstring(abierto,7);
+		static unsigned char counter = 0;
+		if(++counter == 6){
+			STATE = DEFAULT;
+			counter = 0;
+		}
+		
+		
+}
+
+void STATE_successUpdate(){
+	LCDclr();
+	unsigned char msj1[]="Fin ingreso";
+	unsigned char msj2[]= "nueva clave";
+	LCDstring(msj1,11);
+	LCDGotoXY(0,1);
+	LCDstring(msj2,11);	
+	static unsigned char counter = 0;
+	if(++counter == 6){
+		STATE = DEFAULT;
+		counter = 0;
+	}	
+}
+
+
+void STATE_oldPass(){
+	LCDclr();
+	static unsigned char indice = 0;
+	static unsigned char msj [] = "Clave Actual:";
+	LCDstring(msj,13);
+	LCDGotoXY(0,1);
+	if(aux_key[0]){
+		LCDsendChar('*');
+	}
+	if(aux_key[1]){
+		LCDsendChar('*');
+	}
+	if(aux_key[2]){
+		LCDsendChar('*');
+	}
+	LCDcursorOnBlink();
+	if(nueva_tecla){
+		switch (tecla){
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+			aux_key[indice] = tecla;
+			LCDsendChar('*');
+			indice++;
+			if(indice==4){ //ingreso toda la clave
+				indice = 0;
+				if((aux_key[0]==key[0])&&(aux_key[1]==key[1])&&(aux_key[2]==key[2])&&(aux_key[3]==key[3])){
+					STATE = NEW_PASS;
+				}
+				else{
+					STATE = DENY;
+				}
+				aux_key[0]=0;
+				aux_key[1]=0;
+				aux_key[2]=0;
+				aux_key[3]=0;
+				indice=0;
+			}
+			break;
+			case '#':
+			aux_key[0]=0;
+			aux_key[1]=0;
+			aux_key[2]=0;
+			aux_key[3]=0;
+			indice=0;
+			STATE = DEFAULT;
+			break;
+		}
+		
+	}
+	LCDcursorOFF();
+}
+void STATE_newPass(){
+		LCDclr();
+		static unsigned char indice = 0;
+		static unsigned char msj [] = "Clave Nueva:";
+		LCDstring(msj,12);
+		LCDGotoXY(0,1);
+		if(aux_key[0]){
+			LCDsendChar('*');
+		}
+		if(aux_key[1]){
+			LCDsendChar('*');
+		}
+		if(aux_key[2]){
+			LCDsendChar('*');
+		}
+		LCDcursorOnBlink();
+		if(nueva_tecla){
+			switch (tecla){
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+				if(indice<4){
+					aux_key[indice] = tecla;
+					LCDsendChar('*');
+					indice++;
+				}
+				break;
+				case '#':
+				STATE = DEFAULT;
+					aux_key[0]=0;
+					aux_key[1]=0;
+					aux_key[2]=0;
+					aux_key[3]=0;
+					indice =0;
+				break;
+				case 'D':
+				STATE = SUCCESS_UPDATE;
+					key[0]=aux_key[0];
+					key[1]=aux_key[1];
+					key[2]=aux_key[2];
+					key[3]=aux_key[3];
+					aux_key[0]=0;
+					aux_key[1]=0;
+					aux_key[2]=0;
+					aux_key[3]=0;
+					indice =0;
+				break;
+			}
+			
+		}
+		LCDcursorOFF();
+}
+void STATE_readPass(){
+	LCDclr();
+	static unsigned char indice = 1;
+	LCDsendChar('*');
+	if(aux_key[1]){
+		LCDsendChar('*');
+	}
+	if(aux_key[2]){
+		LCDsendChar('*');
+	}
+	LCDcursorOnBlink();
+	if(nueva_tecla){
+		switch (tecla){
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				aux_key[indice] = tecla;
+				LCDsendChar('*');
+				indice++;	
+				if(indice==4){ //ingreso toda la clave
+					indice = 1;
+					if((aux_key[0]==key[0])&&(aux_key[1]==key[1])&&(aux_key[2]==key[2])&&(aux_key[3]==key[3])){
+						STATE = OPEN;						
+					}
+					else{
+						STATE = DENY;
+					}
+					aux_key[0]=0;
+					aux_key[1]=0;
+					aux_key[2]=0;
+					aux_key[3]=0;
+				}			
+			break;		
+		}
+				
+	}
+	LCDcursorOFF();	
+}
+
+
 

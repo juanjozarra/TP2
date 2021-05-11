@@ -31,7 +31,7 @@ extern unsigned char nueva_tecla;
 
 
 void SEOSTimer0Init(){
-	OCR0A = 97; //Valor con el cual comparar
+	OCR0A = 194; //Valor con el cual comparar
 	TCCR0A = (1<<WGM01);// = 0b00000010; Modo CTC
 	TCCR0B = (1<<CS02)|(1<<CS00); // = 0b00000101; clk/1024 (From Prescaler) 8MHz/1024 =  7812.5 Hz
 	TIMSK0 = (1<<OCIE0A); // Habilita el comparador. T=195/7812.5 Hz ~= 24.96 ms ~= 25ms
@@ -46,7 +46,7 @@ ISR (TIMER0_COMPA_vect) //Que hacer cuando se interrumpe
 void SEOSDispatcherTasks(){
 	
 	if(flag_teclado){
-		nueva_tecla = TECLADO_Actualizar(&tecla);		
+		TECLADO_refrescar();		
 		flag_teclado = 0;
 	}
 	
@@ -77,7 +77,7 @@ void SEOSSChedulerTasks(){
 		counter_tiempo = 0;
 	}
 	
-	if(++counter_MEF == 20){
+	if(++counter_MEF == 8){
 		flag_MEF = 1;
 		counter_MEF=0;
 	}
