@@ -9,7 +9,7 @@
 #ifndef MEF_H_
 #define MEF_H_
 
-
+void MEF_init();
 void MEF_actualizar ();
 
 

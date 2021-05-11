@@ -9,7 +9,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "teclado.h"
-#include "lcd.h" //VOLAAAAAAAAAAAAAAAAAAAAAAAAR
 #include "MEF.h"
 #include "reloj.h"
 
@@ -25,14 +24,17 @@ static unsigned char counter_MEF=1; //Empieza un tick antes para desfasarse
 static unsigned char flag_tiempo=0;
 static unsigned char counter_tiempo=0;
 
+extern char tecla;
+extern unsigned char nueva_tecla;
+
 
 
 
 void SEOSTimer0Init(){
-	OCR0A = 77; //Valor con el cual comparar
+	OCR0A = 97; //Valor con el cual comparar
 	TCCR0A = (1<<WGM01);// = 0b00000010; Modo CTC
 	TCCR0B = (1<<CS02)|(1<<CS00); // = 0b00000101; clk/1024 (From Prescaler) 8MHz/1024 =  7812.5 Hz
-	TIMSK0 = (1<<OCIE0A); // Habilita el comparador. T=78/7812.5 Hz ~= 9,98 ms ~= 10ms
+	TIMSK0 = (1<<OCIE0A); // Habilita el comparador. T=195/7812.5 Hz ~= 24.96 ms ~= 25ms
 	sei(); //Habilito interrupciones
 }
 
@@ -44,7 +46,7 @@ ISR (TIMER0_COMPA_vect) //Que hacer cuando se interrumpe
 void SEOSDispatcherTasks(){
 	
 	if(flag_teclado){
-		//mandarTecla();
+		nueva_tecla = TECLADO_Actualizar(&tecla);		
 		flag_teclado = 0;
 	}
 	
@@ -65,26 +67,20 @@ void SEOSGoToSleep(void){
 
 void SEOSSChedulerTasks(){
 
-	if(++counter_teclado==10){
+	if(++counter_teclado == 4){
 		flag_teclado = 1;
 		counter_teclado=0;
 	}
 	
-	if(++counter_tiempo==100){
+	if(++counter_tiempo == 40){
 		flag_tiempo = 1;
 		counter_tiempo = 0;
 	}
 	
-	if(++counter_MEF==30){
+	if(++counter_MEF == 20){
 		flag_MEF = 1;
 		counter_MEF=0;
 	}
 	
 	
-}
-void mandarTecla(){ //VOLAR A LA MIERDAAAAAAAAAAAAAAAAAA
-	char tecla = 0;
-	if(TECLADO_Actualizar(&tecla)){
-		LCDsendChar(tecla);
-	}
 }
