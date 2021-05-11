@@ -260,6 +260,7 @@ void STATE_setMIN(){
 }
 
 void STATE_setSEG(){
+	//Se muestra la informacion en pantalla
 	LCDclr();
 	LCDcursorOFF();
 	static unsigned char aux_seg[2] = {0,0};
@@ -277,6 +278,7 @@ void STATE_setSEG(){
 			LCDstring(aux_seg, 2);
 		}
 	}
+		//Si se presiono una tecla valida realiza la accion correspondiente
 	if (nueva_tecla){
 		switch (tecla){
 			case '0':
@@ -297,6 +299,7 @@ void STATE_setSEG(){
 			}
 			break;
 			case 'C':
+			//Guarda en el reloj el valor almacenado si ingreso segundos validos y vuelve al estado default
 			if (aux_seg[0] && aux_seg[1]) {
 				if (aux_seg[0] < '6'){
 					tiempo[4] = aux_seg[0] - '0';
@@ -312,6 +315,7 @@ void STATE_setSEG(){
 			}
 			break;
 			case '#':
+			// Vuelve al estado default sin guardar los segundos
 			aux_seg[0] = 0;
 			aux_seg[1] = 0;
 			LCDcursorOFF();
@@ -322,10 +326,13 @@ void STATE_setSEG(){
 }
 
 void STATE_deny(){
+	//Muestra Informacion en Pantalla
 	LCDclr();
 	static unsigned char msj []= "DENEGADO";
 	static unsigned char counter = 0;
 	LCDstring(msj,8);
+	
+	//Contador para tardar 2 seg antes de pasar de estado
 	if(++counter == 4){
 		STATE = DEFAULT;
 		counter = 0;
@@ -333,12 +340,15 @@ void STATE_deny(){
 }
 
 void STATE_open(){	
+		//Mostrar Informacion en Pantalla
 		LCDclr();
 		LCDstring(tiempo_String,8);
 		unsigned char abierto[]="ABIERTO";
 		LCDGotoXY(9,1);
 		LCDstring(abierto,7);
 		static unsigned char counter = 0;
+		
+		//Contador para tardar 3 seg antes de pasar de estado
 		if(++counter == 6){
 			STATE = DEFAULT;
 			counter = 0;
@@ -348,6 +358,7 @@ void STATE_open(){
 }
 
 void STATE_successUpdate(){
+	//Mostrar Informacion en Pantalla
 	LCDclr();
 	unsigned char msj1[]="FIN INGRESO";
 	unsigned char msj2[]= "NUEVA CLAVE";
@@ -355,6 +366,8 @@ void STATE_successUpdate(){
 	LCDGotoXY(0,1);
 	LCDstring(msj2,11);	
 	static unsigned char counter = 0;
+	
+	//Contador para tardar 3 seg antes de pasar de estado
 	if(++counter == 6){
 		STATE = DEFAULT;
 		counter = 0;
@@ -363,6 +376,7 @@ void STATE_successUpdate(){
 
 
 void STATE_oldPass(){
+	//Mostrar informacion en pantalla
 	LCDclr();
 	static unsigned char indice = 0;
 	static unsigned char msj [] = "CLAVE ACTUAL:";
@@ -378,6 +392,8 @@ void STATE_oldPass(){
 		LCDsendChar('*');
 	}
 	LCDcursorOnBlink();
+	
+	//Si se presiono una tecla valida realiza la accion correspondiente
 	if(nueva_tecla){
 		switch (tecla){
 			case '0':
@@ -393,12 +409,12 @@ void STATE_oldPass(){
 			aux_key[indice] = tecla;
 			LCDsendChar('*');
 			indice++;
-			if(indice==4){ //ingreso toda la clave
+			if(indice==4){ //Ingreso los 4 valores
 				indice = 0;
-				if((aux_key[0]==key[0])&&(aux_key[1]==key[1])&&(aux_key[2]==key[2])&&(aux_key[3]==key[3])){
+				if((aux_key[0]==key[0])&&(aux_key[1]==key[1])&&(aux_key[2]==key[2])&&(aux_key[3]==key[3])){ //Si es correcta pasa a setear la nueeva clave
 					STATE = NEW_PASS;
 				}
-				else{
+				else{//Caso contrario acceso denegado
 					STATE = DENY;
 				}
 				aux_key[0]=0;
@@ -408,7 +424,7 @@ void STATE_oldPass(){
 				indice=0;
 			}
 			break;
-			case '#':
+			case '#': //Se aborta el cambio de clave volviendo al estado default
 			aux_key[0]=0;
 			aux_key[1]=0;
 			aux_key[2]=0;
@@ -422,6 +438,7 @@ void STATE_oldPass(){
 	LCDcursorOFF();
 }
 void STATE_newPass(){
+		//Mostrar informacion en pantalla
 		LCDclr();
 		static unsigned char indice = 0;
 		static unsigned char msj [] = "CLAVE NUEVA:";
@@ -442,6 +459,7 @@ void STATE_newPass(){
 			LCDcursorOFF();
 		}
 		
+		//Si se presiono una tecla valida realiza la accion correspondiente
 		if(nueva_tecla){
 			switch (tecla){
 				case '0':
@@ -454,13 +472,13 @@ void STATE_newPass(){
 				case '7':
 				case '8':
 				case '9':
-				if(indice<4){
+				if(indice<4){ //Mientras no haya ingresado los 4 valores
 					aux_key[indice] = tecla;
 					LCDsendChar('*');
 					indice++;
 				}
 				break;
-				case '#':
+				case '#': //Aborta el cambio de clave
 				STATE = DEFAULT;
 					aux_key[0]=0;
 					aux_key[1]=0;
@@ -468,8 +486,9 @@ void STATE_newPass(){
 					aux_key[3]=0;
 					indice =0;
 				break;
-				case 'D':
-				STATE = SUCCESS_UPDATE;
+				case 'D': //Si ya ingreso los 4 valores guarda la nueva clave
+				if(indice == 4){
+					STATE = SUCCESS_UPDATE;
 					key[0]=aux_key[0];
 					key[1]=aux_key[1];
 					key[2]=aux_key[2];
@@ -479,6 +498,7 @@ void STATE_newPass(){
 					aux_key[2]=0;
 					aux_key[3]=0;
 					indice =0;
+				}
 				break;
 			}
 			
@@ -486,6 +506,7 @@ void STATE_newPass(){
 		LCDcursorOFF();
 }
 void STATE_readPass(){
+	//Muestro informacion en pantalla
 	LCDclr();
 	static unsigned char indice = 1;
 	LCDsendChar('*');
@@ -496,6 +517,8 @@ void STATE_readPass(){
 		LCDsendChar('*');
 	}
 	LCDcursorOnBlink();
+	
+	//Si se presiono una tecla valida realiza la accion correspondiente
 	if(nueva_tecla){
 		switch (tecla){
 			case '0':
@@ -511,12 +534,12 @@ void STATE_readPass(){
 				aux_key[indice] = tecla;
 				LCDsendChar('*');
 				indice++;	
-				if(indice==4){ //ingreso toda la clave
+				if(indice==4){ //Si ingreso toda la clave
 					indice = 1;
-					if((aux_key[0]==key[0])&&(aux_key[1]==key[1])&&(aux_key[2]==key[2])&&(aux_key[3]==key[3])){
+					if((aux_key[0]==key[0])&&(aux_key[1]==key[1])&&(aux_key[2]==key[2])&&(aux_key[3]==key[3])){ //Si es correcta
 						STATE = OPEN;						
 					}
-					else{
+					else{ //Si es incorrecta
 						STATE = DENY;
 					}
 					aux_key[0]=0;
