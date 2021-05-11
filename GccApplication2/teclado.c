@@ -4,24 +4,11 @@
  * Created: 08/05/2021 19:57:50
  *  Author: Juanjo
  */ 
-/****************************************
-* Conexion del teclado:
-*
-* FILA1 -> PORTB0
-* FILA2 -> PORTB1
-* FILA3 -> PORTB2
-* FILA4 -> PORTB3
-*
-* COLUMNA1 -> PORTB4
-* COLUMNA2 -> PORTB5
-* COLUMNA3 -> PORTB6
-* COLUMNA4 -> PORTB7
-****************************************/
 #include "teclado.h"
 #include <avr/io.h>
 
-static unsigned char nueva_tecla = 0;
-static unsigned char tecla;
+volatile unsigned char nueva_tecla = 0;
+volatile unsigned char tecla;
 
 	unsigned char TECLADO_Actualizar(unsigned char *pkey);
 	unsigned char KeypadScan (unsigned char *Key);
@@ -76,30 +63,27 @@ unsigned char KeypadScan (unsigned char *Key){ //escaneo del teclado
 unsigned char TECLADO_Actualizar(unsigned char *pkey){
 	static unsigned char teclaAnterior = 0xFF;  //Inicializo como que no hubo tecla seleccionada
 	static unsigned char ultimaTeclaValida=0xFF; //Inicializo como que no hubo tecla seleccionada
-	unsigned char tecla;
+	unsigned char aux_tecla;
 	
-	if(!KeypadScan(&tecla)){ //Si no se presiono una tecla
+	if(!KeypadScan(&aux_tecla)){ //Si no se presiono una tecla
 		teclaAnterior=0xFF;
 		ultimaTeclaValida=0xFF;
 		return 0;
 	}
 	
-	if(tecla==teclaAnterior){
-		if(tecla!=ultimaTeclaValida){
-			*pkey=tecla;
-			ultimaTeclaValida=tecla;
+	if(aux_tecla==teclaAnterior){ //Segunda Verificacion
+		if(aux_tecla!=ultimaTeclaValida){
+			*pkey=aux_tecla;
+			ultimaTeclaValida=aux_tecla;
 			return 1;
 		}
 	}
-	teclaAnterior=tecla;
+	teclaAnterior=aux_tecla; //Primera verificacion
 	return 0;
 }
 
-void TECLADO_refrescar (){
-	nueva_tecla = TECLADO_Actualizar(&tecla);
-}
-
-unsigned char TECLADO_tecla(unsigned char *pkey){
-	*pkey = tecla;
-	return nueva_tecla;
+void TECLADO_refrescar (){ //Metodo que actualiza las variable globales 
+	unsigned char aux_tecla;
+	nueva_tecla = TECLADO_Actualizar(&aux_tecla);
+	tecla = aux_tecla;
 }

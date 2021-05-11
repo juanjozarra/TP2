@@ -39,16 +39,16 @@ ENUMS STATE = DEFAULT;
 
 extern unsigned char tiempo_String[];
 extern unsigned char tiempo[6];
+extern unsigned char tecla;
+extern unsigned char nueva_tecla;
 
-static unsigned char tecla, nueva_tecla = 0;
 static unsigned char key[4] = {'0','8','5','2'};
 static unsigned char aux_key[4];
 
 
 
-void MEF_actualizar(){
-	nueva_tecla=TECLADO_tecla(&tecla);
-	switch (STATE)
+void MEF_actualizar(){ //Metodo que actualiza el estado de la maquina
+	switch (STATE) //Segun el estado actual de la maquina se llama al metodo correspondiente
 	{
 		case DEFAULT:
 			STATE_default();
@@ -85,11 +85,14 @@ void MEF_actualizar(){
 
 
 void STATE_default(){
+	//Se muestra la informacion en pantalla
 	LCDclr();
-	LCDstring(tiempo_String,8);
+	LCDstring(tiempo_String,8); 
 	static unsigned char cerrado[]="CERRADO";
 	LCDGotoXY(9,1);
 	LCDstring(cerrado,7);
+	
+	//Si se presiono una tecla cambia el estado al correspondiente
 	if(nueva_tecla){
 		switch (tecla){
 			case 'A':
@@ -114,7 +117,7 @@ void STATE_default(){
 			case '7':
 			case '8':
 			case '9':
-			aux_key[0] = tecla;
+			aux_key[0] = tecla; //Se almacena ya el primer valor del ingreso de la clave
 			STATE = READ_PASS;
 			break;
 		}
@@ -122,6 +125,7 @@ void STATE_default(){
 }
 
 void STATE_setHora(){
+	//Se muestra la informacion en pantalla
 	LCDclr();
 	LCDcursorOFF();
 	static unsigned char aux_hora[2] = {0,0};
@@ -139,6 +143,8 @@ void STATE_setHora(){
 			LCDstring(aux_hora, 2);
 		}
 	}
+	
+	//Si se presiono una tecla valida realiza la accion correspondiente
 	if (nueva_tecla){
 		switch (tecla){
 			case '0':
@@ -151,6 +157,7 @@ void STATE_setHora(){
 			case '7':
 			case '8':
 			case '9':
+			//Si no se ingreso ya, almacena el valor para la hora
 			if (!aux_hora[0]){
 				aux_hora[0] = tecla;
 				} else {
@@ -159,6 +166,7 @@ void STATE_setHora(){
 			}
 			break;
 			case 'A':
+			//Guarda en el reloj el valor almacenado si ingreso una hora valida y vuelve al estado default
 			if (aux_hora[0] && aux_hora[1]) {
 				if (aux_hora[0] < '2' || (aux_hora[0] == '2' && aux_hora[1] < '4')){
 					tiempo[0] = aux_hora[0] - '0';
@@ -173,7 +181,7 @@ void STATE_setHora(){
 				
 			}
 			break;
-			case '#':
+			case '#': // Vuelve al estado default sin guardar la hora
 			aux_hora[0] = 0;
 			aux_hora[1] = 0;
 			LCDcursorOFF();
@@ -185,6 +193,7 @@ void STATE_setHora(){
 
 
 void STATE_setMIN(){
+	//Se muestra la informacion en pantalla
 	LCDclr();
 	LCDcursorOFF();
 	static unsigned char aux_min[2] = {0,0};
@@ -202,6 +211,7 @@ void STATE_setMIN(){
 			LCDstring(aux_min, 2);
 		}
 	}
+	//Si se presiono una tecla valida realiza la accion correspondiente
 	if (nueva_tecla){
 		switch (tecla){
 			case '0':
@@ -214,6 +224,7 @@ void STATE_setMIN(){
 			case '7':
 			case '8':
 			case '9':
+			//Si no se ingreso ya, almacena el valor para los minutos
 			if (!aux_min[0]){
 				aux_min[0] = tecla;
 				} else {
@@ -222,6 +233,7 @@ void STATE_setMIN(){
 			}
 			break;
 			case 'B':
+			//Guarda en el reloj el valor almacenado si ingreso minutos validos y vuelve al estado default
 			if (aux_min[0] && aux_min[1]) {
 				if (aux_min[0] < '6'){
 					tiempo[2] = aux_min[0] - '0';
@@ -237,6 +249,7 @@ void STATE_setMIN(){
 			}
 			break;
 			case '#':
+			// Vuelve al estado default sin guardar los minutos
 			aux_min[0] = 0;
 			aux_min[1] = 0;
 			LCDcursorOFF();
@@ -336,8 +349,8 @@ void STATE_open(){
 
 void STATE_successUpdate(){
 	LCDclr();
-	unsigned char msj1[]="Fin ingreso";
-	unsigned char msj2[]= "nueva clave";
+	unsigned char msj1[]="FIN INGRESO";
+	unsigned char msj2[]= "NUEVA CLAVE";
 	LCDstring(msj1,11);
 	LCDGotoXY(0,1);
 	LCDstring(msj2,11);	
@@ -352,7 +365,7 @@ void STATE_successUpdate(){
 void STATE_oldPass(){
 	LCDclr();
 	static unsigned char indice = 0;
-	static unsigned char msj [] = "Clave Actual:";
+	static unsigned char msj [] = "CLAVE ACTUAL:";
 	LCDstring(msj,13);
 	LCDGotoXY(0,1);
 	if(aux_key[0]){
@@ -411,7 +424,7 @@ void STATE_oldPass(){
 void STATE_newPass(){
 		LCDclr();
 		static unsigned char indice = 0;
-		static unsigned char msj [] = "Clave Nueva:";
+		static unsigned char msj [] = "CLAVE NUEVA:";
 		LCDstring(msj,12);
 		LCDGotoXY(0,1);
 		if(aux_key[0]){
@@ -424,6 +437,11 @@ void STATE_newPass(){
 			LCDsendChar('*');
 		}
 		LCDcursorOnBlink();
+		if(aux_key[3]){
+			LCDsendChar('*');
+			LCDcursorOFF();
+		}
+		
 		if(nueva_tecla){
 			switch (tecla){
 				case '0':
@@ -512,6 +530,3 @@ void STATE_readPass(){
 	}
 	LCDcursorOFF();	
 }
-
-
-

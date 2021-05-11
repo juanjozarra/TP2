@@ -23,7 +23,7 @@ int main(void)
 	
     while (1) 
     {
-		//DISPACHER SUPER SIMPLE
+		//DISPACHER
 		SEOSDispatcherTasks();	
 		
     }

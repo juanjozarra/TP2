@@ -8,7 +8,7 @@
 volatile unsigned char tiempo [6] = {0,0,0,0,0,0};
 volatile char tiempo_String[]="00:00:00";
 
-void RELOJ_Actualizar(void){
+void RELOJ_Actualizar(void){ //Metodo que incrementa en 1 seg la hora y lo almacena en un string y un vector
 	if(++tiempo[5]>9){
 		tiempo[5]=0;
 		if(++tiempo[4]>5){

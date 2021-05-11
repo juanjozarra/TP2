@@ -13,7 +13,5 @@
 	#define PIN PINB
 	
 	void TECLADO_refrescar ();
-	unsigned char TECLADO_tecla(unsigned char *pkey);
-
 
 #endif
